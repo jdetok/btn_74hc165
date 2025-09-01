@@ -105,33 +105,38 @@ int main() {
     while (1) {
         uint8_t state = hc165_read();
 
-        // if (state != btn_state) {
-        //     char binval[9];
-        //     for (int i = 7; i >= 0; i--) {
-        //         binval[7 - i] = (state & (1 << i)) ? '1' : '0';
-        // }
-        //     // itoa(hc165_read(), binval, 2);
-        //     binval[8] = '\0';
-        //     lcd_clr_print(0, 0, binval);
-        //     // btn_state = state;
-        // }
-        for (uint8_t i = SH0; i < BTN_CNT; i++) {    
-           if (state & (btns.btn[i].sr_pos) && !(btns.state & (btns.btn[i].sr_pos))) {
-                // test_state = ~test_state;
-                // test_state ^= 1;
-                btns.btn[i].state ^= 1;
-        
-                char bt[3] = btns.btn[i].name;
-                lcd_goto_print(1, 0, bt);
-                lcd_goto_print(1, 4, "state: ");
-                char buf[2];
-                itoa(btns.btn[i].state, buf, 10);
-                lcd_goto_print(1, 7, buf);
+        if (state != btns.state) {
+            char binval[9];
+            for (int b = 7; b >= 0; b--) {
+                binval[7 - b] = (state & (1 << b)) ? '1' : '0';
             }
+            // itoa(hc165_read(), binval, 2);
+            binval[8] = '\0';
+            lcd_goto_print(0, 0, binval);
+
+            for (uint8_t i = SH0; i < BTN_CNT; i++) {    
+                if (state & (btns.btn[i].sr_pos) && !(btns.state & (btns.btn[i].sr_pos))) {
+                    btns.btn[i].state ^= 1;
+                    lcd_goto_print(1, 0, btns.btn[i].name);
+                    lcd_goto_print(1, 3, "state: ");
+                    char buf[2];
+                    itoa(btns.btn[i].state, buf, 10);
+                    lcd_goto_print(1, 9, buf);
+                }
+                // write to byte   
+            }
+            btns.state = state;
+
+        // char *btnval;
+        // for (int b = 7; b >= 0; b--) {
+        //     btnval[7 - b] = (btns.state & (1 << b)) ? '1' : '0';
+        // }
+        // // itoa(hc165_read(), binval, 2);
+        // btnval[8] = '\0';
+        // lcd_clr_print(1, 0, btnval);
         }
         
-        btns.state = state;
-        // _delay_ms(500)
+    // _delay_ms(500)
     }
 }
 
