@@ -52,9 +52,11 @@ uint8_t hc165_read(void) {
     return ~val;
 }
 
-// typedef struct {
-//     uint8_t tst;
-// } buttons;
+typedef struct {
+    uint8_t sr_pos;
+    uint8_t state;
+    char *name;
+} button;
 
 typedef enum {
     SH0,
@@ -68,48 +70,67 @@ typedef enum {
     BTN_CNT // number of buttons (8)
 } btn_id;
 
+typedef struct {
+    button btn[8];
+    uint8_t state;
+} buttons;
+
 int main() {
     // DDRB |= LCD_SER | LCD_CLK | LCD_LTC; // lcd sr output pins
     DDRB |= INTLED;
     DDRD |= CE_PIN | CLK_PIN | PL_PIN; // input sr output pins
     DDRD &= ~DATA_PIN; // data in as input
-    
-    // buttons btns = {
-    //     .tst = (1 << 1)
-    // };
+
+    buttons btns = {
+        .btn = {
+            {.sr_pos = (1 << SH0), .state = 0, .name = "t1"},
+            {.sr_pos = (1 << SH1), .state = 0, .name = "t2"},
+            {.sr_pos = (1 << SH2), .state = 0, .name = "t3"},
+            {.sr_pos = (1 << SH3), .state = 0, .name = "t4"},
+            {.sr_pos = (1 << SH4), .state = 0, .name = "t5"},
+            {.sr_pos = (1 << SH5), .state = 0, .name = "t6"},
+            {.sr_pos = (1 << SH6), .state = 0, .name = "t7"},
+            {.sr_pos = (1 << SH7), .state = 0, .name = "t8"}
+        },
+        .state = 0
+    };
 
     lcd_init();
     lcd_clr_print(0, 0, "test");
     
-    uint8_t btn_state = hc165_read();
-    uint8_t test_state = 0;
+    // uint8_t btn_state = hc165_read();
+    // uint8_t test_state = 0;
 
 
     while (1) {
         uint8_t state = hc165_read();
 
-        if (state != btn_state) {
-            char binval[9];
-            for (int i = 7; i >= 0; i--) {
-                binval[7 - i] = (state & (1 << i)) ? '1' : '0';
-        }
-            // itoa(hc165_read(), binval, 2);
-            binval[8] = '\0';
-            lcd_clr_print(0, 0, binval);
-            // btn_state = state;
-        }
+        // if (state != btn_state) {
+        //     char binval[9];
+        //     for (int i = 7; i >= 0; i--) {
+        //         binval[7 - i] = (state & (1 << i)) ? '1' : '0';
+        // }
+        //     // itoa(hc165_read(), binval, 2);
+        //     binval[8] = '\0';
+        //     lcd_clr_print(0, 0, binval);
+        //     // btn_state = state;
+        // }
         for (uint8_t i = SH0; i < BTN_CNT; i++) {    
-           if ((state & (1 << i)) && !(btn_state & (1 << i))) {
+           if (state & (btns.btn[i].sr_pos) && !(btns.state & (btns.btn[i].sr_pos))) {
                 // test_state = ~test_state;
-                test_state ^= 1;
-                lcd_goto_print(1, 0, "state: ");
+                // test_state ^= 1;
+                btns.btn[i].state ^= 1;
+        
+                char bt[3] = btns.btn[i].name;
+                lcd_goto_print(1, 0, bt);
+                lcd_goto_print(1, 4, "state: ");
                 char buf[2];
-                itoa(test_state, buf, 10);
+                itoa(btns.btn[i].state, buf, 10);
                 lcd_goto_print(1, 7, buf);
             }
         }
         
-        btn_state = state;
+        btns.state = state;
         // _delay_ms(500)
     }
 }
