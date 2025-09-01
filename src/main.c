@@ -96,11 +96,7 @@ int main() {
     };
 
     lcd_init();
-    lcd_clr_print(0, 0, "test");
-    
-    // uint8_t btn_state = hc165_read();
-    // uint8_t test_state = 0;
-
+    // lcd_clr_print(0, 0, "test");
 
     while (1) {
         uint8_t state = hc165_read();
@@ -126,20 +122,9 @@ int main() {
                 // write to byte   
             }
             btns.state = state;
-
-        // char *btnval;
-        // for (int b = 7; b >= 0; b--) {
-        //     btnval[7 - b] = (btns.state & (1 << b)) ? '1' : '0';
-        // }
-        // // itoa(hc165_read(), binval, 2);
-        // btnval[8] = '\0';
-        // lcd_clr_print(1, 0, btnval);
         }
-        
-    // _delay_ms(500)
     }
 }
-
 // while (1) {
 //         PORTB |= INTLED;
 //         _delay_ms(100);
